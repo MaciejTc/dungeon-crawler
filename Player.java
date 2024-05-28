@@ -13,13 +13,12 @@ public class Player {
         this.x = 1; // Starting position
         this.y = 1;
         this.lastDirectionX = 0;
-        this.lastDirectionY = -1; // Początkowy kierunek - góra
+        this.lastDirectionY = -1; // Initial direction - up
     }
 
     public void handleKey(int keyCode) {
         int newX = x;
         int newY = y;
-        boolean toggleMode = false;
 
         switch (keyCode) {
             case KeyEvent.VK_UP:
@@ -46,32 +45,26 @@ public class Player {
                 lastDirectionX = 1;
                 lastDirectionY = 0;
                 break;
-            case KeyEvent.VK_SPACE:
-                toggleMode = true;
+            case KeyEvent.VK_H:
+                dungeon.toggleHighlightPath(); // Toggle path highlighting
                 break;
         }
 
-        if (toggleMode) {
-            toggleAdjacentTile();
-        } else if (dungeon.isWalkable(newX, newY)) {
+        if (isWithinBounds(newX, newY) && dungeon.isWalkable(newX, newY)) {
             x = newX;
             y = newY;
-            checkNextLevel(newX, newY); // Sprawdzanie przechodzenia na kolejny poziom
+            checkNextLevel(newX, newY);
         }
     }
 
-    private void toggleAdjacentTile() {
-        int adjacentX = x + lastDirectionX;
-        int adjacentY = y + lastDirectionY;
-        if (adjacentX >= 0 && adjacentX < Constants.FLOOR_WIDTH && adjacentY >= 0 && adjacentY < Constants.FLOOR_HEIGHT) {
-            dungeon.toggleTile(adjacentX, adjacentY);
-        }
+    private boolean isWithinBounds(int x, int y) {
+        return x >= 0 && x < Constants.FLOOR_WIDTH && y >= 0 && y < Constants.FLOOR_HEIGHT;
     }
 
     private void checkNextLevel(int newX, int newY) {
         if (dungeon.getTileType(newX, newY) == 2) {
             dungeon.generateNextLevel();
-            x = 1; // Przywróć gracza do początkowej pozycji
+            x = 1; // Reset player to starting position
             y = 1;
         }
     }
@@ -79,7 +72,7 @@ public class Player {
     public void handleMouseClick(Point point) {
         int targetX = point.x / Constants.TILE_SIZE;
         int targetY = point.y / Constants.TILE_SIZE;
-        if (dungeon.isWalkable(targetX, targetY)) {
+        if (isWithinBounds(targetX, targetY) && dungeon.isWalkable(targetX, targetY)) {
             x = targetX;
             y = targetY;
         }
